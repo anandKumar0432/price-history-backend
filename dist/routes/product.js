@@ -13,18 +13,17 @@ const express_1 = require("express");
 const serpapi_1 = require("../services/serpapi");
 const router = (0, express_1.Router)();
 router.get("/products/:productId/price-history", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { productId } = req.params;
+    const productId = req.params.productId;
     if (!productId) {
         res.json({
-            message: "product id required"
+            message: "product Id required"
         });
     }
     try {
-        const productQuery = productId;
-        const priceHistoryData = yield (0, serpapi_1.getProductPriceHistory)(productQuery);
+        const priceHistoryData = yield (0, serpapi_1.getProductPriceHistory)(productId);
         if (!priceHistoryData.organic_results) {
             res.json({
-                message: "items not found with this product id!"
+                message: "items not found with this product Id!"
             });
         }
         const priceHistory = priceHistoryData.organic_results.map((item) => ({
@@ -36,6 +35,7 @@ router.get("/products/:productId/price-history", (req, res) => __awaiter(void 0,
         res.json({ productId, priceHistory });
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ message: error.message });
     }
 }));

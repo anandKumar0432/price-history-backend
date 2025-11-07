@@ -4,18 +4,17 @@ import { Router, Request, Response } from "express";
     const router = Router();
 
     router.get("/products/:productId/price-history", async (req: Request, res: Response) => {
-      const { productId } = req.params; 
+      const productId = req.params.productId;
       if(!productId){
         res.json({
-            message : "product id required"
+            message : "product Id required"
         })
       }
       try {
-        const productQuery = productId;
-        const priceHistoryData = await getProductPriceHistory(productQuery);
+        const priceHistoryData = await getProductPriceHistory(productId);
         if(!priceHistoryData.organic_results){
             res.json({
-                message : "items not found with this product id!"
+                message : "items not found with this product Id!"
             })
         }
         const priceHistory = priceHistoryData.organic_results.map((item : any) =>({
@@ -24,9 +23,9 @@ import { Router, Request, Response } from "express";
             link: item.link,
             rating: item.rating,
         }))
-
         res.json({ productId, priceHistory });
       } catch (error: any) {
+        console.log(error);
         res.status(500).json({ message: error.message });
       }
     });

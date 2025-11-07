@@ -1,9 +1,8 @@
 
-import { PrismaClient } from "./generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Test the database connection
 prisma.$connect()
   .then(() => {
     console.log('Successfully connected to the database');

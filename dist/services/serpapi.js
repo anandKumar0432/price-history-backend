@@ -16,9 +16,9 @@ function getProductPriceHistory(productQuery) {
         try {
             const response = yield (0, serpapi_1.getJson)({
                 engine: "amazon",
-                amazon_domain: "amazon.in",
-                k: productQuery,
                 api_key: process.env.SERP_API_KEY,
+                domain: "amazon.in",
+                k: productQuery,
             });
             return response;
         }

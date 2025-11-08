@@ -18,3 +18,21 @@ model User {
   email       String    @unique
   password    String
 }
+
+model Product {
+  id           String         @id @default(cuid())
+  name         String
+  url          String
+  imageUrl     String?
+  currentPrice Float
+  priceHistory PriceHistory[]
+  createdAt    DateTime       @default(now())
+}
+
+model PriceHistory {
+  id         String   @id @default(cuid())
+  productId  String
+  price      Float
+  date       DateTime
+  product    Product  @relation(fields: [productId], references: [id])
+}

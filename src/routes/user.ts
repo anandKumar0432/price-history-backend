@@ -23,6 +23,17 @@ router.post("/signup", async (req, res) => {
         
         const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
 
+        const alreadyExist = await prisma.user.findUnique({
+            where : {
+                email:parsedBody.email,
+            }
+        })
+        if(alreadyExist){
+            res.status(401).json({
+                message: "user already exists !",
+            })
+        }
+
         const user = await prisma.user.create({
             data: {
                 email: parsedBody.email,
@@ -74,7 +85,7 @@ router.post("/signin", async (req, res)=>{
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000, 
+            maxAge: 24 * 60 * 60 * 1000,
         });
 
         res.status(200).json({

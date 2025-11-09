@@ -1,18 +1,20 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const serpapi_1 = require("../services/serpapi");
+const zod_1 = require("zod");
+const db_1 = require("../db");
 const router = (0, express_1.Router)();
-router.get("/products/:productId/price-history", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const searchProductSchema = zod_1.z.object({
+    url: zod_1.z.string(),
+});
+router.get("/", (req, res) => {
+    res.json({
+        message: "hii there from the product routes !"
+    });
+});
+router.get("/products/:productId/price-history", async (req, res) => {
+    console.log("hii there");
     const productId = req.params.productId;
     if (!productId) {
         res.json({
@@ -20,7 +22,7 @@ router.get("/products/:productId/price-history", (req, res) => __awaiter(void 0,
         });
     }
     try {
-        const priceHistoryData = yield (0, serpapi_1.getProductPriceHistory)(productId);
+        const priceHistoryData = await (0, serpapi_1.getProductPriceHistory)(productId);
         if (!priceHistoryData.organic_results) {
             res.json({
                 message: "items not found with this product Id!"
@@ -38,5 +40,36 @@ router.get("/products/:productId/price-history", (req, res) => __awaiter(void 0,
         console.log(error);
         res.status(500).json({ message: error.message });
     }
-}));
+});
+router.post("/find", async (req, res) => {
+    console.log("hii there");
+    try {
+        const { url } = searchProductSchema.parse(req.body);
+        if (!url) {
+            res.status(400).json({
+                message: "didn't get the url!",
+            });
+        }
+        const product = await db_1.prisma.product.findFirst({
+            where: {
+                url,
+            },
+            select: {
+                name: true,
+                url: true,
+                imageUrl: true,
+                currentPrice: true,
+                priceHistory: true,
+            }
+        });
+        res.status(200).json({
+            product
+        });
+    }
+    catch (e) {
+        res.status(500).json({
+            message: "Internal server error !",
+        });
+    }
+});
 exports.default = router;

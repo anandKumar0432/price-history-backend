@@ -17,6 +17,12 @@ const signinSchema = z.object({
     password : z.string(),
 })
 
+router.get("/",(req,res)=>{
+    res.json({
+        message: "hii there !"
+    })
+})
+
 router.post("/signup", async (req, res) => {
     try {
         const parsedBody = signupSchema.parse(req.body);

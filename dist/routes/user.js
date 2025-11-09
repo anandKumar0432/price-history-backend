@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,11 +18,26 @@ const signinSchema = zod_1.z.object({
     email: zod_1.z.string(),
     password: zod_1.z.string(),
 });
-router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/", (req, res) => {
+    res.json({
+        message: "hii there !"
+    });
+});
+router.post("/signup", async (req, res) => {
     try {
         const parsedBody = signupSchema.parse(req.body);
-        const hashedPassword = yield bcrypt_1.default.hash(parsedBody.password, 10);
-        const user = yield db_1.prisma.user.create({
+        const hashedPassword = await bcrypt_1.default.hash(parsedBody.password, 10);
+        const alreadyExist = await db_1.prisma.user.findUnique({
+            where: {
+                email: parsedBody.email,
+            }
+        });
+        if (alreadyExist) {
+            res.status(401).json({
+                message: "user already exists !",
+            });
+        }
+        const user = await db_1.prisma.user.create({
             data: {
                 email: parsedBody.email,
                 name: parsedBody.name,
@@ -54,11 +60,11 @@ router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function*
             message: "Internal server error"
         });
     }
-}));
-router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+router.post("/signin", async (req, res) => {
     try {
         const { email, password } = signinSchema.parse(req.body);
-        const user = yield db_1.prisma.user.findUnique({
+        const user = await db_1.prisma.user.findUnique({
             where: {
                 email,
             }
@@ -68,7 +74,7 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
                 message: "email or password doesn't match!"
             });
         }
-        const isValid = yield bcrypt_1.default.compare(password, user.password);
+        const isValid = await bcrypt_1.default.compare(password, user.password);
         if (!isValid) {
             return res.status(400).json({
                 message: "email or password doesn't match!"
@@ -92,5 +98,5 @@ router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function*
             message: "something went wrong!"
         });
     }
-}));
+});
 exports.default = router;

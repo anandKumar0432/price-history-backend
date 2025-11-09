@@ -18,6 +18,11 @@ const signinSchema = zod_1.z.object({
     email: zod_1.z.string(),
     password: zod_1.z.string(),
 });
+router.get("/", (req, res) => {
+    res.json({
+        message: "hii there !"
+    });
+});
 router.post("/signup", async (req, res) => {
     try {
         const parsedBody = signupSchema.parse(req.body);
